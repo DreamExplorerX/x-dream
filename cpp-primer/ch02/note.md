@@ -165,7 +165,7 @@ const用来定义不被改变的变量，即可将变量定义为常量
 
 * **指向常量的指针** `const double pi = 3.14; const double* cptr = &pi;`
 
-* 指向常量的指针的类型应与所指对象类型一致，但有两个例外；其一为允许指向常量的指针指向费常量对象；
+* 指向常量的指针的类型应与所指对象类型一致，但有两个例外；其一为允许指向常量的指针指向非常量对象；
 
 * **const指针** 又称为**常量指针**，指针本身为常量，必须初始化，且不可更改指针指向
 
@@ -176,11 +176,115 @@ const用来定义不被改变的变量，即可将变量定义为常量
   const double *const pip = &pi;  // pip是指向const对象pi的const指针
   ```
 
-* 
+* 类型需从右向左读
 
-* 
+  > const double* cptr = & pi;  // 表示cptr为一个指针，指向 const double类型对象
+  >
+  > int * const curErr = &errNumb;  // 表示curErr 为一个const指针，指向int类型对象
 
-* 
+* **顶层const (top-level const)** 表示指针本身是常量
+
+* **底层const (low-level const)** 表示指针所指对象是常量
+
+  ```c++
+  int i = 0;
+  int *const pi = &i;       // 顶层const，pi为const指针，指向int类型对象
+  const int ci = 42;        // 顶层const，ci为const int类型对象
+  const int *p2 = &ci;      // 底层const，p2为指针，指向const int类型对象
+  const int *const p3 = p2; // 右侧const为顶层const，表示p3为const指针，左侧为底层const，表示指向const int类型对象
+  const int &r = ci;  // 底层const，用于声明引用的const都是底层const
+  ```
+
+#### constexpr和常量表达式
+
+* **常量表达式(const expression)**是指值不会改变并且在编译过程就能得到计算结果的表达式。字面值属于常量表达式，用常量表达式初始化的const对象也是常量表达式
+
+* 一个对象（或表达式）是否为常量表达式由其数据类型和初始值功能决定
+
+  ```c++
+  const int max_files = 20;        // max_files 是常量表达式
+  const int limit = max_files + 1; // limit 是常量表达式
+  int staff_size = 27;             // staff_size 不是常量表达式
+  const int sz = get_size();       // sz不是常量表达式
+  ```
+
+* **constexpr** C++11规定允许将变量声明为**constexpr**类型，以便由编译器来验证变量是否为常量表达式
+
+* **constexpr**变量一定是个常量，必须由常量表达式或`constexpr`函数（一种足够简单能在编译器计算结果的函数）初始化
+
+  ```c++
+  constexpr int mf = 20;        // 20 是常量表达式
+  constexpr int limit = mf + 1; // mf + 1 是常量表达式
+  constexpr int sz = size();    // 当size()为constexpr函数时，才为正确声明语句
+  ```
+
+* **constexpr指针**的初始值必须是`nullptr`或者0，或者是存储于某个固定地址中的对象
+
+* 定义于所有函数体之外的对象其地址固定不变，可用来初始化`constexpr`指针；
+
+* 6.1.1节中，有一类变量，可超出其函数定义本身，也有固定地址，可用来初始化`constexpr`指针；填坑后续
+
+* **constexpr**把它所定义的对象置为了顶层const
 
 ### 处理类型
+
+#### 类型别名(Type Alias)
+
+类型别名为某种类型的同义词，可简化复杂类型
+
+* **typedef** 传统方法定义类型别名
+
+  ```c++
+  typedef double wages;  //wages 是 double 的同义词
+  typedef wages base, *p;  // base 是 double 的同义词，p是double*的同义词
+  ```
+
+* **using** C++11
+
+  ```c++
+  using SI = Sales_item;  // SI 是 Sales_item 的同义词
+  ```
+
+* **Note** 不要错误的尝试把类型别名替换成原来的样子来理解含义，容易错误理解
+
+  ```c++
+  typedef char *pstring;
+  const pstring cstr = 0;  // cstr 是指向char 的常量指针
+  const pstring *ps;       // ps 是一个指针，指向char的常量指针
+  ```
+
+#### auto类型说明符
+
+C++11引入`auto`类型说明符，通过编译器分析表达式所属类型
+
+* **auto**通过初始值推算变量类型，故auto定义的变量必须有初始值
+
+* **auto**可在一条语句中声明多个变量，但所有变量的初始基本数据类型都一致；切记`&`和`*`不是基本类型的而一部分
+
+* 引用作为auto变量初始值时，类型为引用对象的类型
+
+  ```c++
+  int i = 0, &r = i;
+  auto a = r;  // a 是一个整型
+  ```
+
+* auto会忽略顶层const，保留底层const；若希望推断出的auto类型为顶层const，则需要明确指出
+
+  ```c++
+  const int ci = i, &cr = ci;
+  auto b = ci;  // b为整型，ci的顶层const特性呗忽略
+  auto e = &ci;  // e是一个指向整数常量的指针
+  const auto f = ci;  // f 为 const int
+  ```
+
+* auto引用会保留初始值中的顶层const特性，即此时的常量不是顶层常量
+
+#### decltype类型说明符
+
+C++11引入`decltype`类型说明符，其作用是选择并返回操作数的数据类型，但并不实际计算
+
+* decltype处理顶层const和引用的方式与auto不同。若decltype使用的表达式是一个变量，则decltype返回该变量的类型（包括顶层const和引用在内）; 如果decltype使用的是一个不加括号的变量，则得到的结果就是该变量的类型；如果给变量加上了一层或多层括号，编译器会将其当成一个表达式，则得到引用类型。
+* 若decltype使用的表达式不是一个变量，则decltype返回表达式结果对应的类型；如果表达式为解引用操作，则decltype将得到引用类型；
+
+### 自定义数据结构
 

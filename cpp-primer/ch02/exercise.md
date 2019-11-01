@@ -377,16 +377,125 @@ int i = 42;    void *p = &i;    long *lp = &i;
 下面的那些初始化是合法的？请说明原因。
 
 ```c++
-(a) int i = -1, &r = 0;          (b) int *const p2 = &i2;
-(c) const int i = -1, &r = 0;    (d) const int *const p3 = &i2;
-(e) const int *p1 = &i2;         (f) const int &const r2;
-(g) const int i2 = i, &r = i;
+(a) int i = -1, &r = 0;        // 不合法，r必须引用一个对象   
+(b) int *const p2 = &i2;       // 合法
+(c) const int i = -1, &r = 0;  // 合法
+(d) const int *const p3 = &i2; // 合法
+(e) const int *p1 = &i2;       // 合法
+(f) const int &const r2;       // 不合法，引用不是对象，故不能是const
+(g) const int i2 = i, &r = i;  // 合法
 ```
-
-(a) 不合法，试图使用非常量引用绑定常量对象
-
-(b) 
 
 ### 练习2.28
 
+说明下面的这些定义是什么意思，挑出其中不合法的。
+
+```c++
+(a) int i, *const cp;      // 不合法，cp为const指针，必须初始化
+(b) int *p1, *const p2;    // 不合法，p2为const指针，必须初始化
+(c) const int ic, &r = ic; // ic 为const对象，必须初始化
+(d) const int *const p3;   // p3为const指针，必读初始化
+(e) const int *p;          // 合法
+```
+
 ### 练习2.29
+
+假设已有上一个练习中定义的哪些变量，则下面的哪些语句是合法的？请说明原因
+
+```c++
+(a) i = ic;   // 合法
+(b) p1 = p3;  // 不合法，非常量指针不能够指向常量对象
+(c) p1 = &ic; // 不合法，同上
+(d) p3 = *ic; // 不合法，p3是常量指针，初始化后不可更改指向对象
+(e) p2 = p1;  // 不合法，同上
+(f) ic = *p3; // 不合法，ic为常量对象，初始化后不可改变值
+```
+
+### 练习2.30
+
+对于下面的这些语句，请说明对象被声明成了顶层const还是底层const？
+
+```c++
+const int v2 = 0;                              // 顶层const
+int v1 = v2;             
+int *p1 = &v1, &r1 = v1;                       
+const int *p2 = &v2, *const p3 = &i, &r2 = v2; // p2为底层const，p3为顶层和底层const，r2为底层const
+```
+
+### 练习2.31
+
+假设已有上一个练习中所做的那些声明，则下面的哪些语句是合法的？请说明顶层const和底层const在每个例子中有何体现。
+
+```c++
+r1 = v2;          // 合法，r1引用v1, v1为int，可改变其值
+p1 = p2; p2 = p1; // 不合法，p1为int*,不可指向常量对象; 合法，p2为const int*,可指向非常量对象
+p1 = p3; p2 = p3; // 不合法，同上; 合法，p2和p3都有底层const
+```
+
+### 练习2.32
+
+下面的代码是否合法？如果非法，请设法将其修改正确
+
+```c++
+int null = 0, *p = null; // 非法，error: cannot initialize a variable of type 'int *' with an lvalue of type 'int'
+int null = 0, *p = &null;    // 修改1
+int null = 0, *p = nullptr;  // 修改2
+```
+
+### 练习2.33
+
+利用本节定义的变量，判断下列语句的运行结果
+
+```c++
+a = 42;  // 42
+b = 42;  // 42
+c = 42;  // 42
+d = 42;  // 失败，d为int*指针
+e = 42;  // 失败，e为const int* 指针
+g = 42;  // 失败，g为const int& 引用
+```
+
+### 练习2.34
+
+基于上一个练习中的变量和语句编写一段程序，输出赋值前后变量的内容，你刚才的推断正确吗？如果不对，请反复研读本节的示例直到你明白错在何处为止。
+
+[code]()在此
+
+### 练习2.35
+
+判断下列定义推断出的类型是什么，然后编写程序进行验证。
+
+```c++
+const int i = 42;
+auto j = i; const auto &k = i; auto *p = &i;  // j: int; k: const int&; p: const int*;
+const auto j2 = i, &k2 = i;                   // j2: cosnt int; k2: k2: const int&;
+```
+
+### 练习2.36
+
+关于下面的代码，请指出每一个变量的类型以及程序结束时他们各自的值。
+
+```c++
+int a = 3, b = 4;    // a: 3; b: 4;
+decltype(a) c = a;   // a: 3; b: 4; c: int, 3;
+decltype((b)) d = a; // a: 3; b: 4; c: 3; d: int&, 4;
+++c;                 // a: 3; b: 4; c: 4; d: 4;
+++d;                 // a: 4; b: 4; c: 4; d: 4;
+```
+
+[code]()在此
+
+### 练习2.37
+
+赋值是会产生引用的一类典型表达式，引用的类型就是左值的类型。也就是说，如果i是int，则表达式i=x的类型是int&。根据这一特点，请指出下面的代码中每一个变量的类型和值。
+
+```c++
+int a = 3, b = 4;
+decltype(a) c = a;     // c: int, 3;
+decltype(a = b) d = a; // d: int&, 绑定到a;
+```
+
+### 练习2.38
+
+说明由decltype指定类型和由auto指定类型有何区别。请举出一个例子，decltype指定的类型与auto指定的类型一样：再举一个例子，decltype指定的类型与auto指定的类型不一样。
+
