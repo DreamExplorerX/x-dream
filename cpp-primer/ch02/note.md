@@ -8,7 +8,7 @@ C++基本数据类型包括**算数类型(arithmetic type)**和**空类型(void)
 
 算数类型分为两类：**整形(integral type，包括字符和布尔类型在内)**和**浮点型**
 
-![image-1](/Users/xuhao110/Documents/learn/cpp-primer/ch02/images/image2-1.jpg)
+![image-1](images/image2-1.jpg)
 
 - 布尔类型(bool) 取值是 真(true)或 假(false)
 - C++语言规定 `short <= int <= long <= longlong`， `long long`为C++11新特性
@@ -64,7 +64,7 @@ for (unsigned u = 10; u >= 0; --u)
 
 * 添加前缀和后缀，可改变整型、浮点型和字符型字面值的默认类型；比如`L'a'`为宽字符型字面值，类型是`wchar_t`
 
-  ![image2-2](/Users/xuhao110/Documents/learn/cpp-primer/ch02/images/image2-2.jpg)
+  ![image2-2](images/image2-2.jpg)
 
 * 布尔字面值即`true`和`false`，而指针字面值即`nullptr`
 
@@ -291,4 +291,7 @@ C++11引入`decltype`类型说明符，其作用是选择并返回操作数的�
 * 类的花括号为一个新作用域
 * 类体右侧即最后必须写分号，因为类体或可紧跟变量名以示对该类型对象的定义，当然不建议这样定义；
 * C++11规定，可为数据成员提供类内初始值(in-class initializer)，无初始值的成员将被默认初始化
-* 
+* 头文件通常包含只能被定义一次的实体，比如类、const和constexpr变量
+* 头文件保护符(header guard)依赖于预处理变量。预处理变量有两种状态：已定义和未定义。`#define`指令定义预处理变量，`#ifdef`和`#ifndef`判断检查变量，遇`#endif`结束
+* 头文件保护符和`#progma once`都可以有效防止头文件重复包含的问题
+* 预处理变量无视C++语言中关于作用域的规则
