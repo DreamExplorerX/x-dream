@@ -408,13 +408,13 @@ int main()
 
 输入表示多个ISBN的多条销售记录来测试上一个程序，每个ISBN的记录应该聚在一起。
 
-![exercise1_24](/Users/xuhao110/Documents/learn/cpp-primer/ch01/images/exercise1_24.jpg)
+![exercise1_24](images/exercise1_24.jpg)
 
 ### 练习1.25
 
 借助网站上的`Sales_item.h`头文件，编译并运行本节给出的书店程序
 
-![exercise1_25](/Users/xuhao110/Documents/learn/cpp-primer/ch01/images/exercise1_25.jpg)
+![exercise1_25](images/exercise1_25.jpg)
 
 
 

@@ -459,7 +459,7 @@ g = 42;  // 失败，g为const int& 引用
 
 基于上一个练习中的变量和语句编写一段程序，输出赋值前后变量的内容，你刚才的推断正确吗？如果不对，请反复研读本节的示例直到你明白错在何处为止。
 
-[code]()在此
+[ex2-34](ex2-34.cc)在此
 
 ### 练习2.35
 
@@ -483,7 +483,7 @@ decltype((b)) d = a; // a: 3; b: 4; c: 3; d: int&, 4;
 ++d;                 // a: 4; b: 4; c: 4; d: 4;
 ```
 
-[code]()在此
+[ex2-36](ex2-36.cc)在此
 
 ### 练习2.37
 
@@ -499,3 +499,170 @@ decltype(a = b) d = a; // d: int&, 绑定到a;
 
 说明由decltype指定类型和由auto指定类型有何区别。请举出一个例子，decltype指定的类型与auto指定的类型一样：再举一个例子，decltype指定的类型与auto指定的类型不一样。
 
+1. auto 会忽略顶层const，若希望auto变量有const特性，则需要显示声明const；auto由初始值推断类型，故auto声明的变量必须有初始值；引用作为auto初始值时，推断类型会引用所引用的值类型；显示声明auto引用时，会把初始值的const当做底层const保留；
+2. decltype是分析表达式，得到其数据类型。若表达式不是变量，则返回表达式结果对应的类型（包括const和引用）；若表达式是解引用操作，则decltype得到引用类型；若表达式是变量，若变量不加括号，则得到该变量类型；否则得到其引用类型；
+
+```c++
+int i = 0, r = &i;
+//same
+auto a = i;
+decltype(a) d = i;
+
+// different
+auto ar = r;  // ar: int
+decltype(r) dr = r;  // dr: int&
+```
+
+### 练习2.39
+
+编译下面的程序观察其运行结果，注意，如果忘记写类定义体后面的分号会发生什么情况？记录下相关信息，以后可能会有用。
+
+```c++
+struct Foo { /* 此处为空 */ }  // 注意：没有分号
+int main()
+{
+  return 0;
+}
+```
+
+报错，错误信息为`error: expected ';' after struct`
+
+### 练习2.40
+
+根据自己的理解写出Sales_data类，最好与书中的例子有所区别
+
+```c++
+struct Sales_data{
+  std::string bookNo;
+  std::string author;
+  unsigned int units_sold = 0;
+  double revenue = 0.0;
+}
+```
+
+### 练习2.41
+
+使用你自己的Sales_data类重写1.5.1节（第20页）、1.5.2节（第21页）和1.6节（第22页）的练习。眼下先把Sales_data类的定义和main函数放在同一个文件里。
+
+* 1.5.1
+
+  ```c++
+  #include <iostream>
+  #include <string>
+  
+  struct Sales_data
+  {
+      std::string bookNo;
+      unsigned units_sold = 0;
+      double revenue = 0.0;
+  };
+  
+  int main()
+  {
+      Sale_datas book;
+      double price;
+      std::cin >> book.bookNo >> book.units_sold >> price;
+      book.revenue = book.units_sold * price;
+      std::cout << book.bookNo << " " << book.units_sold << " " << book.revenue << " " << price;
+  
+      return 0;
+  }
+  ```
+
+* 1.5.2
+
+  ```c++
+  #include <iostream>
+  #include <string>
+  
+  struct Sales_data {
+    std::string bookNo;
+    unsigned int units_sold = 0;
+    double revenue = 0;
+  };
+  
+  int main() {
+    Sales_data sd1, sd2;
+    double price1, price2;
+    std::cin >> sd1.bookNo >> sd1.units_sold >> price1;
+    std::cin >> sd2.bookNo >> sd2.units_sold >> price2;
+    sd1.revenue = sd1.units_sold * price1;
+    sd2.revenue = sd2.units_sold * price2;
+  
+    if (sd1.bookNo == sd2.bookNo) {
+      unsigned int total_sold = sd1.units_sold + sd2.units_sold;
+      double total_revenue = sd1.revenue + sd2.revenue;
+      std::cout << sd1.bookNo << " " << total_sold << " " << total_revenue;
+      if (total_sold != 0) {
+        std::cout << " " << total_revenue / total_sold << std::endl;
+      } else {
+        std::cout << "No Sales" << std::endl;
+      }
+    } else {
+      std::cout << "These books' bookNo are different" << std::endl;
+    }
+    return 0;
+  }
+  ```
+
+* 1.6
+
+  ```c++
+  #include <iostream>
+  #include <string>
+  
+  struct Sales_data {
+    std::string bookNo;
+    unsigned int units_sold = 0;
+    double revenue = 0.0;
+  };
+  
+  int main() {
+    Sales_data total;
+    double total_price;
+    if (std::cin >> total.bookNo >> total.units_sold >> total_price) {
+      total.revenue = total.units_sold * total_price;
+      Sales_data trans;
+      double price;
+      while (std::cin >> trans.bookNo >> trans.units_sold >> price) {
+        trans.revenue = trans.units_sold * price;
+  
+        if (total.bookNo == trans.bookNo) {
+          total.units_sold += trans.units_sold;
+          total.revenue += trans.revenue;
+        } else {
+          std::cout << total.bookNo << " " << total.units_sold << " "
+                    << total.revenue << " ";
+          if (total.units_sold != 0) {
+            std::cout << total.revenue / total.units_sold << std::endl;
+          } else {
+            std::cout << "No Sales!" << std::endl;
+          }
+  
+          total.bookNo = trans.bookNo;
+          total.units_sold = trans.units_sold;
+          total.revenue = trans.revenue;
+        }
+      }
+  
+      std::cout << total.bookNo << " " << total.units_sold << " " << total.revenue
+                << " ";
+      if (total.units_sold != 0) {
+        std::cout << total.revenue / total.units_sold << std::endl;
+      } else {
+        std::cout << "No Sales!" << std::endl;
+      }
+    } else {
+      std::cout << "No data?" << std::endl;
+    }
+    return 0;
+  }
+  ```
+
+### 练习2.42
+
+根据你自己的理解重写一个Sales_data.h头文件，并以此为基础重做2.6.2节（第67页）的练习。
+
+* [1.5.1](ex2-42-1.cc)
+* [1.5.2](ex2-42-2.cc)
+* [1.6](ex2-42-3.cc)
